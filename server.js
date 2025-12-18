@@ -1,0 +1,20 @@
+@ -0,0 +1,19 @@
+const express = require('express');
+const axios = require('axios');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/coc/*', async (req, res) => {
+  try {
+    const path = req.params[0];
+    const url = `https://api.clashofclans.com/v1/${path}`;
+    const response = await axios.get(url, {
+      headers: { 'Authorization': req.headers.authorization }
+    });
+    res.json(response.data);
+  } catch (error) {
+    res.status(error.response?.status || 500).json(error.response?.data || {error: 'Internal Error'});
+  }
+});
+
+app.listen(PORT, () => console.log(`Proxy running on port ${PORT}`));
