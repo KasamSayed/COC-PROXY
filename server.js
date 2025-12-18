@@ -1,21 +1,22 @@
 const express = require('express');
 const axios = require('axios');
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// 1. Health Check (To see if the proxy is alive at all)
+// Render provides the port in process.env.PORT
+const PORT = process.env.PORT || 10000;
+
+// 1. Home Page Test
 app.get('/', (req, res) => {
-  res.send('Proxy is online! Use /coc/ followed by your path.');
+  res.send('Proxy is online! If you see this, the 404 is fixed.');
 });
 
-// 2. The Main Proxy Logic
+// 2. The Proxy Route
 app.get('/coc/*', async (req, res) => {
   try {
-    // Extract everything after /coc/
-    const apiPath = req.params[0]; 
+    const apiPath = req.params[0];
     const url = `https://api.clashofclans.com/v1/${apiPath}`;
     
-    console.log(`Forwarding request to: ${url}`);
+    console.log(`Fetching: ${url}`);
     
     const response = await axios.get(url, {
       headers: { 
@@ -25,7 +26,7 @@ app.get('/coc/*', async (req, res) => {
     });
     res.json(response.data);
   } catch (error) {
-    console.error("Error fetching from CoC API:", error.message);
+    console.error("CoC API Error:", error.message);
     res.status(error.response?.status || 500).json(error.response?.data || { error: 'Internal Proxy Error' });
   }
 });
