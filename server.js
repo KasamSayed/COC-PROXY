@@ -3,6 +3,7 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// This line MUST have '/coc/*'
 app.get('/coc/*', async (req, res) => {
   try {
     const path = req.params[0];
