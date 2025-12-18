@@ -3,25 +3,31 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// This catch-all route handles everything after /coc/
+// 1. Health Check (To see if the proxy is alive at all)
+app.get('/', (req, res) => {
+  res.send('Proxy is online! Use /coc/ followed by your path.');
+});
+
+// 2. The Main Proxy Logic
 app.get('/coc/*', async (req, res) => {
   try {
-    const path = req.params[0];
-    const url = `https://api.clashofclans.com/v1/${path}`;
+    // Extract everything after /coc/
+    const apiPath = req.params[0]; 
+    const url = `https://api.clashofclans.com/v1/${apiPath}`;
     
-    console.log(`Forwarding request to: ${url}`); // This shows in Render Logs
+    console.log(`Forwarding request to: ${url}`);
     
     const response = await axios.get(url, {
-      headers: { 'Authorization': req.headers.authorization }
+      headers: { 
+        'Authorization': req.headers.authorization,
+        'Accept': 'application/json'
+      }
     });
     res.json(response.data);
   } catch (error) {
-    console.error("Proxy Error:", error.message);
-    res.status(error.response?.status || 500).json(error.response?.data || {error: 'Internal Error'});
+    console.error("Error fetching from CoC API:", error.message);
+    res.status(error.response?.status || 500).json(error.response?.data || { error: 'Internal Proxy Error' });
   }
 });
 
-// Added a root route to stop the 404 on the main page
-app.get('/', (req, res) => res.send('Proxy is online! Use /coc/ followed by your API path.'));
-
-app.listen(PORT, () => console.log(`Proxy running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
